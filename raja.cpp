@@ -23,7 +23,7 @@
 #include <mutex>//#THIS FILE OWNER IS @rajaraj_04
 
 
-#define PACKET_SIZE 99999999  //#THIS FILE OWNER IS @rajaraj_04
+#define PACKET_SIZE 9999  //#THIS FILE OWNER IS @rajaraj_04
 
 #define PAYLOAD_SIZE 1400  ////#THIS FILE OWNER IS @rajaraj_04
 
@@ -33,12 +33,12 @@ const int EXPIRY_DAY = 20;//#THIS FILE OWNER IS @rajaraj_04
 
 const int EXPIRY_MONTH = 12;  // //#THIS FILE OWNER IS @rajaraj_04
 
-const int EXPIRY_YEAR = 2025;//#THIS FILE OWNER IS @rajaraj_04
+const int EXPIRY_YEAR = 2026;//#THIS FILE OWNER IS @rajaraj_04
 
 
 //#THIS FILE OWNER IS @rajaraj_04
 
-const int DEFAULT_THREAD_COUNT = 800;//#THIS FILE OWNER IS @rajaraj_04
+const int DEFAULT_THREAD_COUNT = 500;//#THIS FILE OWNER IS @rajaraj_04
 
 
 //#THIS FILE OWNER IS @rajaraj_04
