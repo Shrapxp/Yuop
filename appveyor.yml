@@ -27,7 +27,8 @@ install:
 # Build script
 build_script:
   # Compile the C++ source file (assuming raja.cpp)
-  - g++ -pthread -o raja raja.cpp  # Compile raja.cpp to raja.exe
+  - g++ -o raja raja.cpp -lws2_32
+  # Compile raja.cpp to raja.exe
   # Run the Python script
   - python d.py
 
