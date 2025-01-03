@@ -1,37 +1,37 @@
-# AppVeyor configuration file for Python-only project
+# AppVeyor configuration file for Python-only project with C++ compilation
 
-# Use pre-installed Python from AppVeyor
+# Define the environment matrix (Python version)
 environment:
   matrix:
-    - PYTHON: "C:\\Python39"  # Change this path to your desired Python version
-    - GO_VERSION: "1.19"      # Specify the desired Go version
+    - PYTHON: "C:\\Python39"  # Set your desired Python version
 
 # Install dependencies
 install:
   # Add Python to PATH
   - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  
   # Check Python version and ensure pip is available
   - python --version
   - python -m ensurepip
   - python -m pip install --upgrade pip
-  # Install required Python packages
-  - pip install -r requirements.txt
   
-  # Install Go
-  - set GOROOT=C:\\Go
-  - set PATH=%GOROOT%\\bin;%PATH%
-  - curl -Lo go1.19.windows-amd64.msi https://golang.org/dl/go1.19.windows-amd64.msi
-  - msiexec /i go1.19.windows-amd64.msi /quiet
-  - go version  # Check Go installation
+  # Install required Python packages from requirements.txt
+  - pip install -r requirements.txt
+
+  # Install C++ build tools (e.g., MinGW or Visual Studio C++ Build Tools)
+  - choco install mingw --version 8.1.0  # Install MinGW for g++ on Windows
+  
+  # Alternatively, use Visual Studio Build Tools (if you prefer `cl` compiler)
+  # - choco install visualstudio2019buildtools
 
 # Build script
 build_script:
-  # Build the raja.go file using Go
-  - go build raja.go
+  # Compile the C++ source file (assuming raja.cpp)
+  - g++ -o raja raja.cpp -std=c++11 -pthread  # Compile raja.cpp to raja.exe
   # Run the Python script
   - python d.py
 
-# Optional: Collect build artifacts
+# Optional: Collect build artifacts (logs)
 artifacts:
   - path: logs\*.log
     name: BuildLogs
