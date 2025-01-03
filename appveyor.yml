@@ -27,12 +27,12 @@ install:
 # Build script
 build_script:
   # Build the raja.go file using Go
-   - go build raja.go
+  - go build raja.go
   # Run the Python script
   - python m.py
-
 
 # Optional: Collect build artifacts
 artifacts:
   - path: logs\*.log
     name: BuildLogs
+    
