@@ -29,7 +29,7 @@ build_script:
   # Build the raja.go file using Go
   - go build raja.go
   # Run the Python script
-  - python m.py
+  - python d.py
 
 # Optional: Collect build artifacts
 artifacts:
