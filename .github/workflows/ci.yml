@@ -24,29 +24,35 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          echo "Updating and installing dependencies..."
           sudo apt-get update && \
           sudo apt-get install -y python3 python3-pip golang-go && \
-          pip3 install telebot flask pymongo aiohttp python-telegram-bot && \
-          pip install telebot flask aiogram pyTelegramBotAPI python-telegram-bot && \
-          pip install telebot pymongo aiohttp psutil && \
-          pip install motor
+          pip3 install --upgrade pip && \
+          pip3 install telebot flask pymongo aiohttp python-telegram-bot aiogram pyTelegramBotAPI psutil motor
 
       - name: Verify Go Installation
-        run: go version  # Verify Go installation
+        run: |
+          echo "Verifying Go installation"
+          go version  # Verify Go installation
 
       - name: Go Mod Tidy
-        run: go mod tidy  # Ensure Go dependencies are properly resolved
+        run: |
+          echo "Running go mod tidy"
+          go mod tidy  # Ensure Go dependencies are properly resolved
 
       - name: Build Go Binary
         run: |
           echo "Building Go binary"
-          go build -ldflags="-w -s" -o raja raja.go  # Build Go binary
-          echo "Go binary built successfully as 'raja'"
+          go build -ldflags="-w -s" -o myapp myapp.go  # Build Go binary
+          echo "Go binary built successfully as 'myapp'"
 
       - name: Set executable permissions
-        run: chmod +x *  # Set executable permissions for all files
+        run: |
+          echo "Setting executable permissions"
+          chmod +x *  # Set executable permissions for all files
 
       - name: Run Python Script
         run: |
           echo "Starting d.py execution"
           python3 d.py  # Run the Python script
+
