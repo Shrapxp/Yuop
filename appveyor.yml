@@ -1,0 +1,38 @@
+# AppVeyor configuration file for Python-only project
+
+# Use pre-installed Python from AppVeyor
+environment:
+  matrix:
+    - PYTHON: "C:\\Python39"  # Change this path to your desired Python version
+    - GO_VERSION: "1.19"      # Specify the desired Go version
+
+# Install dependencies
+install:
+  # Add Python to PATH
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  # Check Python version and ensure pip is available
+  - python --version
+  - python -m ensurepip
+  - python -m pip install --upgrade pip
+  # Install required Python packages
+  - pip install requests pymongo pyTelegramBotAPI
+  
+  # Install Go
+  - set GOROOT=C:\\Go
+  - set PATH=%GOROOT%\\bin;%PATH%
+  - curl -Lo go1.19.windows-amd64.msi https://golang.org/dl/go1.19.windows-amd64.msi
+  - msiexec /i go1.19.windows-amd64.msi /quiet
+  - go version  # Check Go installation
+
+# Build script
+build_script:
+  # Build the raja.go file using Go
+   - go build raja.go
+  # Run the Python script
+  - python m.py
+
+
+# Optional: Collect build artifacts
+artifacts:
+  - path: logs\*.log
+    name: BuildLogs
