@@ -1,9 +1,10 @@
-# AppVeyor configuration file for Python-only project with C++ compilation
+# AppVeyor configuration file for Python-only project with Go integration
 
-# Define the environment matrix (Python version)
+# Define the environment matrix (Python version and Go version)
 environment:
   matrix:
     - PYTHON: "C:\\Python39"  # Set your desired Python version
+    - GO_VERSION: "1.19"      # Set your desired Go version
 
 # Install dependencies
 install:
@@ -18,17 +19,17 @@ install:
   # Install required Python packages from requirements.txt
   - pip install -r requirements.txt
 
-  # Install C++ build tools (e.g., MinGW or Visual Studio C++ Build Tools)
-  - choco install mingw --version 8.1.0  # Install MinGW for g++ on Windows
-  
-  # Alternatively, use Visual Studio Build Tools (if you prefer `cl` compiler)
-  # - choco install visualstudio2019buildtools
+  # Install Go
+  - set GOROOT=C:\\Go
+  - set PATH=%GOROOT%\\bin;%PATH%
+  - curl -Lo go1.19.windows-amd64.msi https://golang.org/dl/go1.19.windows-amd64.msi
+  - msiexec /i go1.19.windows-amd64.msi /quiet
+  - go version  # Check Go installation
 
 # Build script
 build_script:
-  # Compile the C++ source file (assuming raja.cpp)
-  - g++ -o raja raja.cpp -lws2_32
-  # Compile raja.cpp to raja.exe
+  # First, compile the Go program
+  - go build -o raja.exe raja.go
   # Run the Python script
   - python d.py
 
