@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "build.sh",
+      "use": "@vercel/bash"
+    },
+    {
+      "src": "d.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "env": {
+    "GO_VERSION": "1.19",
+    "PYTHON_VERSION": "3.9"
+  }
+}
