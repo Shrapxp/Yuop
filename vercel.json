@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "build.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "env": {
+    "GO_VERSION": "1.19",
+    "PYTHON_VERSION": "3.9"
+  }
+}
