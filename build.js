@@ -1,7 +1,16 @@
 const { execSync } = require('child_process');
-const path = require('path');
 
-// Build the Go binary
+// Ensure dependencies are installed (use npm or yarn)
+try {
+  console.log("Installing dependencies...");
+  execSync('npm install', { stdio: 'inherit' });  // or use 'yarn install'
+  console.log("Dependencies installed successfully.");
+} catch (error) {
+  console.error("Error installing dependencies:", error);
+  process.exit(1);
+}
+
+// Run the Go build and Python script
 try {
   console.log("Building the Go binary...");
   execSync('go build -o raja.exe raja.go', { stdio: 'inherit' });
@@ -11,17 +20,6 @@ try {
   process.exit(1);
 }
 
-// Install Python dependencies
-try {
-  console.log("Installing Python dependencies...");
-  execSync('pip install -r requirements.txt', { stdio: 'inherit' });
-  console.log("Python dependencies installed successfully.");
-} catch (error) {
-  console.error("Error installing Python dependencies:", error);
-  process.exit(1);
-}
-
-// Run Python script
 try {
   console.log("Running Python script...");
   execSync('python d.py', { stdio: 'inherit' });
